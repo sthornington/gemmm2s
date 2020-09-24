@@ -1,0 +1,19 @@
+[tasks]
+bmc
+proof
+
+[options]
+bmc: mode bmc
+bmc: depth 10
+proof: mode prove
+proof: depth 5
+
+[engines]
+smtbmc
+
+[script]
+read -formal register.sv
+prep -top register
+
+[files]
+register.sv
