@@ -1,4 +1,6 @@
+`timescale 1 ns / 1 ps
 `default_nettype none
+
 
 // each side gets skid buffer attached to a fifo.  in the core,
 // a beat is pulled from each fifo when both are valid and the output

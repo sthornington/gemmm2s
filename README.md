@@ -2,6 +2,20 @@
 
 Verilog module for converting from AXI4 MM of Zynq GEM Ethernet DMA to AXI-Stream with packet boundaries.
 
+## Background
+
+I'm a software developer.  I bought a Zynq Zybo Z7 to play around with Ethernet data in
+FPGA logic, but didn't at the time know what to look for.
+
+## Disclaimers
+
+I'm a software developer!  This is my first hardware project.  Much of this stuff is
+borrowed from or heavily inspired by things I read on https://zipcpu.com or
+http://fpgacpu.ca .  The register, fifo and skid buffer are straight-up cut & paste jobs.
+The others I did myself, and the formal proofs I mostly did myself.  And of course, the
+problem is all mine, since nobody else I am sure is dumb enough to buy an FPGA board to
+do packet processing in logic where the PHY/SERDES are not connected to the logic!
+
 ## Problem
 
 When using a Xilinx Zynq board, the Ethernet port(s) are most often connected to the

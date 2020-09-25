@@ -1,10 +1,11 @@
-`timescale 1 ns / 1 ns
+`timescale 1 ns / 1 ps
 `default_nettype none
 /*
 
  This module presents a write-only AXI4 slace interface with two pages, a data page (page 0) and a control page (page 1).
  The data page base address (0x0000) is expected to be given as the memory buffer pointer in the buffer descriptors
- passed to the GEM hard ethernet MAC DMA core.  The GEM will DMA packets into the data page, sequentially (at least this is the observed behavior on the Zynq 7020), INCR, and this will forward the data out an AXI-Stream master.
+ passed to the GEM hard ethernet MAC DMA core.  The GEM will DMA packets into the data page, sequentially (at least this
+ is the observed behavior on the Zynq 7020), INCR, and this will forward the data out an AXI-Stream master.
 
  Separately, in the control page, the PS core embedded ARM driver/code is expected to write a 0x00000001 to the first
  register in the control page (0x1000) whenever the GEM interrupts the PS core driver with a DMA complete interrupt.
@@ -318,6 +319,7 @@ module gemmm2s_v2 #(
             implied_burst_span = ((C_AXI_ADDR_WIDTH-1)'(s_axi_awlen)+1) * WADDR_INCR;
             available_burst_in_page = ({(C_AXI_ADDR_WIDTH-1){1'b1}} - s_axi_awaddr[C_AXI_ADDR_WIDTH-2:0]);
 
+// TODO: FORMAL PROOFS OF gemmm2s_v2 ARE NOT WORKING YET
 `ifdef GEMMM2SV2_FORMAL
             assume(s_axi_awsize == AWSIZE_EXPECTED);
             assume(s_axi_awburst == 2'b01); // must be burst type INCR

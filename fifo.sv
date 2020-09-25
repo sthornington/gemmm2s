@@ -1,4 +1,4 @@
-`timescale 1 ns / 1 ns
+`timescale 1 ns / 1 ps
 `default_nettype none
 module fifo #(
               parameter integer FIFO_WIDTH = 32,
