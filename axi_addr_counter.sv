@@ -1,5 +1,4 @@
 `timescale 1 ns / 1 ps
-`default_nettype none
 
 /*
 
@@ -19,21 +18,21 @@ module axi_addr_counter #(
    localparam DATA_WIDTH = 32, // DO NOT CHANGE
    localparam SIZE_WIDTH = 3
    )
-   (
-    input wire logic                   clk,
-    input wire logic                   reset,
+    (
+     input logic                  clk,
+     input logic                  reset,
 
-    // AXI AW Lines
-    input wire logic [ADDR_WIDTH-1:0]  i_awaddr,
-    input wire logic [7:0]             i_awlen,
-    input wire logic [2:0]             i_awsize,
-    input wire logic [1:0]             i_awburst,
-    input wire logic                   i_awvalid,
-    output wire logic                  i_awready,
+     // AXI AW Lines
+     input logic [ADDR_WIDTH-1:0] i_awaddr,
+     input logic [7:0]            i_awlen,
+     input logic [2:0]            i_awsize,
+     input logic [1:0]            i_awburst,
+     input logic                  i_awvalid,
+     output logic                   i_awready,
 
-    output wire logic [ADDR_WIDTH-1:0] o_next_addr_data,
-    output wire logic                  o_next_addr_valid,
-    input wire logic                   o_next_addr_ready
+     output logic [ADDR_WIDTH-1:0]  o_next_addr_data,
+     output logic                   o_next_addr_valid,
+     input logic                  o_next_addr_ready
     );
     // we cut some corners and assume that all bus transactions will be
     // for the max width of the bus
@@ -263,4 +262,3 @@ module axi_addr_counter #(
 `endif
 
 endmodule
-`default_nettype wire

@@ -1,23 +1,22 @@
 `timescale 1 ns / 1 ps
-`default_nettype none
+
 module fifo #(
               parameter integer FIFO_WIDTH = 32,
               parameter integer FIFO_ADDR_SZ = 1 // infers the depth of 2^sz!
               )
     (
-     input wire logic                     clk,
-     input wire logic                     reset,
+     input logic                    clk,
+     input logic                    reset,
 
-     input wire logic                     i_wr,
-     input wire logic [FIFO_WIDTH-1 : 0]  i_data,
-     output wire logic                    o_full,
+     input logic                    i_wr,
+     input logic [FIFO_WIDTH-1 : 0] i_data,
+     output logic                     o_full,
 
-     input wire logic                     i_rd,
-     output wire logic [FIFO_WIDTH-1 : 0] o_data,
-     output wire logic                    o_empty,
+     input logic                    i_rd,
+     output logic [FIFO_WIDTH-1 : 0]  o_data,
+     output logic                     o_empty,
 
-     output wire logic [FIFO_ADDR_SZ:0]   o_count
-
+     output logic [FIFO_ADDR_SZ:0]    o_count
      );
     parameter                       FIFO_DEPTH = 1 << FIFO_ADDR_SZ;
 
@@ -229,4 +228,3 @@ module fifo #(
 
 
 endmodule
-`default_nettype wire

@@ -1,5 +1,4 @@
 `timescale 1 ns / 1 ps
-`default_nettype none
 
 module register
   #(
@@ -7,11 +6,11 @@ module register
     parameter RESET_VALUE = 0
     )
     (
-     input wire logic                   clk,
-     input wire logic                   clk_en,
-     input wire logic                   reset,
-     input wire logic [WORD_WIDTH-1:0]  i_data,
-     output wire logic [WORD_WIDTH-1:0] o_data
+     input logic                   clk,
+     input logic                   clk_en,
+     input logic                   reset,
+     input logic [WORD_WIDTH-1:0]  i_data,
+     output logic [WORD_WIDTH-1:0] o_data
      );
 
     initial begin
@@ -56,4 +55,3 @@ module register
 `endif
 
 endmodule
-`default_nettype wire

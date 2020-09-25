@@ -12,7 +12,7 @@ all:	gemmm2s_sim.vcd
 
 # TODO: cleanup formal crap too
 clean:
-	rm -Rf $(OBJDIR)
+	rm -Rf $(OBJDIR) ; rm -Rf *bmc ; rm -Rf *cover ; rm -Rf *proof
 
 formal: register skid_buffer stream_join last_beat_calc axi_addr_counter gemmm2s_v2
 

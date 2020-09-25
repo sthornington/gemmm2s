@@ -1,21 +1,20 @@
 `timescale 1 ns / 1 ps
-`default_nettype none
 
 module skid_buffer
   #(
     parameter WORD_WIDTH = 8
     )
     (
-     input wire logic                   clk,
-     input wire logic                   reset,
+     input logic                  clk,
+     input logic                  reset,
 
-     input wire logic                   i_valid,
-     output wire logic                  i_ready,
-     input wire logic [WORD_WIDTH-1:0]  i_data,
+     input logic                  i_valid,
+     output wire                  i_ready,
+     input logic [WORD_WIDTH-1:0] i_data,
 
-     output wire logic                  o_valid,
-     input wire logic                   o_ready,
-     output wire logic [WORD_WIDTH-1:0] o_data
+     output wire                  o_valid,
+     input logic                  o_ready,
+     output wire [WORD_WIDTH-1:0] o_data
      );
 
     localparam WORD_ZERO = {WORD_WIDTH{1'b0}};
@@ -92,11 +91,11 @@ module skid_buffer
         remove = (o_valid == 1'b1) && (o_ready == 1'b1);
     end
 
-    logic load    = 1'b0; // Empty datapath inserts data into output register.
-    logic flow    = 1'b0; // New inserted data into output register as the old data is removed.
-    logic fill    = 1'b0; // New inserted data into buffer register. Data not removed from output register.
-    logic flush   = 1'b0; // Move data from buffer register into output register. Remove old data. No new data inserted.
-    logic unload  = 1'b0; // Remove data from output register, leaving the datapath empty.
+    logic load    = 1'b0; // Empty datapath inserts data into output logicister.
+    logic flow    = 1'b0; // New inserted data into output logicister as the old data is removed.
+    logic fill    = 1'b0; // New inserted data into buffer register. Data not removed from output logicister.
+    logic flush   = 1'b0; // Move data from buffer register into output logicister. Remove old data. No new data inserted.
+    logic unload  = 1'b0; // Remove data from output logicister, leaving the datapath empty.
 
     always @(*) begin
         load    = (state == EMPTY) && (insert == 1'b1) && (remove == 1'b0);
@@ -308,4 +307,3 @@ module skid_buffer
 `endif
 
 endmodule
-`default_nettype wire

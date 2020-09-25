@@ -66,13 +66,13 @@ module gemmm2s_wrapper #(
     always @(*)
       reset = !ARESETN;
 
-    reg [C_AXI_ID_WIDTH-1 : 0]          skid_awid;
-    reg [C_AXI_ADDR_WIDTH-1 : 0]        skid_awaddr;
-    reg [7 : 0]                         skid_awlen;
-    reg [2 : 0]                         skid_awsize;
-    reg [1 : 0]                         skid_awburst;
-    reg                                 skid_awvalid;
-    reg                                 skid_awready;
+    wire [C_AXI_ID_WIDTH-1 : 0]          skid_awid;
+    wire [C_AXI_ADDR_WIDTH-1 : 0]        skid_awaddr;
+    wire [7 : 0]                         skid_awlen;
+    wire [2 : 0]                         skid_awsize;
+    wire [1 : 0]                         skid_awburst;
+    wire                                 skid_awvalid;
+    wire                                 skid_awready;
 
     // TODO: inbound skids could be half-skids?  (i.e. the data lines
     // probably need not be registered)
@@ -88,10 +88,10 @@ module gemmm2s_wrapper #(
        .o_ready(skid_awready),
        .o_data({skid_awid, skid_awaddr, skid_awlen, skid_awsize, skid_awburst}));
 
-    reg [C_AXI_DATA_WIDTH-1 : 0]        skid_wdata;
-    reg                                 skid_wlast;
-    reg                                 skid_wvalid;
-    reg                                 skid_wready;
+    wire [C_AXI_DATA_WIDTH-1 : 0]        skid_wdata;
+    wire                                 skid_wlast;
+    wire                                 skid_wvalid;
+    wire                                 skid_wready;
 
     // INBOUND skid of W
     skid_buffer #(.WORD_WIDTH(C_AXI_TOTAL_W_WIDTH)) wskid
@@ -104,10 +104,10 @@ module gemmm2s_wrapper #(
        .o_ready(skid_wready),
        .o_data({skid_wdata, skid_wlast}));
 
-    reg [C_AXI_ID_WIDTH-1 : 0]          skid_bid;
-    reg [1 : 0]                         skid_bresp;
-    reg                                 skid_bvalid;
-    reg                                 skid_bready;
+    wire [C_AXI_ID_WIDTH-1 : 0]          skid_bid;
+    wire [1 : 0]                         skid_bresp;
+    wire                                 skid_bvalid;
+    wire                                 skid_bready;
 
     // OUTBOUND skid of B
     skid_buffer #(.WORD_WIDTH(C_AXI_TOTAL_B_WIDTH)) bskid
@@ -120,10 +120,10 @@ module gemmm2s_wrapper #(
        .o_ready(S_AXI_BREADY),
        .o_data({S_AXI_BID, S_AXI_BRESP}));
 
-    reg [C_AXI_DATA_WIDTH-1 : 0]        skid_tdata;
-    reg                                 skid_tlast;
-    reg                                 skid_tvalid;
-    reg                                 skid_tready;
+    wire [C_AXI_DATA_WIDTH-1 : 0]        skid_tdata;
+    wire                                 skid_tlast;
+    wire                                 skid_tvalid;
+    wire                                 skid_tready;
 
     // OUTBOUND skid of T
     skid_buffer #(.WORD_WIDTH(C_AXI_TOTAL_T_WIDTH)) tskid

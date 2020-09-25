@@ -1,5 +1,5 @@
 `timescale 1 ns / 1 ps
-`default_nettype none
+
 /*
 
  This module presents a write-only AXI4 slace interface with two pages, a data page (page 0) and a control page (page 1).
@@ -31,41 +31,41 @@
  */
 
 module gemmm2s_v2 #(
-   // Parameters of Axi Slave Bus Interface S00_AXI
-   parameter integer C_AXI_ID_WIDTH = 1,
-   localparam C_AXI_DATA_WIDTH = 32, // DO NOT CHANGE
-   localparam C_AXI_ADDR_WIDTH = 13 // DO NOT CHANGE
-   )
-   (
-    input wire logic                           clk,
-    input wire logic                           reset,
+                    // Parameters of Axi Slave Bus Interface S00_AXI
+                    parameter integer C_AXI_ID_WIDTH = 1,
+                    localparam C_AXI_DATA_WIDTH = 32, // DO NOT CHANGE
+                    localparam C_AXI_ADDR_WIDTH = 13 // DO NOT CHANGE
+                    )
+    (
+     input logic                          clk,
+     input logic                          reset,
 
-    // Ports of Axi Slave Bus Interface S_AXI
-    input wire logic [C_AXI_ID_WIDTH-1 : 0]    s_axi_awid,
-    input wire logic [C_AXI_ADDR_WIDTH-1 : 0]  s_axi_awaddr,
-    input wire logic [7 : 0]                   s_axi_awlen,
-    input wire logic [2 : 0]                   s_axi_awsize,
-    input wire logic [1 : 0]                   s_axi_awburst,
-    input wire logic                           s_axi_awvalid,
-    output wire logic                          s_axi_awready,
+     // Ports of Axi Slave Bus Interface S_AXI
+     input logic [C_AXI_ID_WIDTH-1 : 0]   s_axi_awid,
+     input logic [C_AXI_ADDR_WIDTH-1 : 0] s_axi_awaddr,
+     input logic [7 : 0]                  s_axi_awlen,
+     input logic [2 : 0]                  s_axi_awsize,
+     input logic [1 : 0]                  s_axi_awburst,
+     input logic                          s_axi_awvalid,
+     output logic                           s_axi_awready,
 
-    input wire logic [C_AXI_DATA_WIDTH-1 : 0]  s_axi_wdata,
-    input wire logic                           s_axi_wlast,
-    input wire logic                           s_axi_wvalid,
-    output wire logic                          s_axi_wready,
+     input logic [C_AXI_DATA_WIDTH-1 : 0] s_axi_wdata,
+     input logic                          s_axi_wlast,
+     input logic                          s_axi_wvalid,
+     output logic                           s_axi_wready,
 
-    output wire logic [C_AXI_ID_WIDTH-1 : 0]   s_axi_bid,
-    output wire logic [1 : 0]                  s_axi_bresp,
-    output wire logic                          s_axi_bvalid,
-    input wire logic                           s_axi_bready,
+     output logic [C_AXI_ID_WIDTH-1 : 0]    s_axi_bid,
+     output logic [1 : 0]                   s_axi_bresp,
+     output logic                           s_axi_bvalid,
+     input logic                          s_axi_bready,
 
-    // Ports of Axi Stream Master Bus Interface M_AXIS
-    output wire logic [C_AXI_DATA_WIDTH-1 : 0] m_axis_tdata,
-    output wire logic                          m_axis_tlast,
-    output wire logic                          m_axis_tvalid,
-    input wire logic                           m_axis_tready
-    // don't bother with tkeep for now
-    );
+     // Ports of Axi Stream Master Bus Interface M_AXIS
+     output logic [C_AXI_DATA_WIDTH-1 : 0]  m_axis_tdata,
+     output logic                           m_axis_tlast,
+     output logic                           m_axis_tvalid,
+     input logic                          m_axis_tready
+     // don't bother with tkeep for now
+     );
 
     // TODO make this based on addr_width
     // data page is at 13'h0000
@@ -571,4 +571,3 @@ module gemmm2s_v2 #(
 `endif
 
 endmodule
-`default_nettype wire

@@ -1,5 +1,4 @@
 `timescale 1 ns / 1 ps
-`default_nettype none
 
 /*
  This is the core module for attaching TLAST to the stream of DMA
@@ -63,27 +62,27 @@ module last_beat_calc #(
                         parameter integer BUS_WIDTH = 32,
                         parameter [ADDR_WIDTH-1:0] BASE_ADDR = 0
                         )
-   (
-    input wire logic                  clk,
-    input wire logic                  reset,
+    (
+     input logic                  clk,
+     input logic                  reset,
 
-    // address of the beat being received
-    input wire logic [ADDR_WIDTH-1:0] i_addr_data,
-    input wire logic                  i_addr_valid,
-    output wire logic                 i_addr_ready,
+     // address of the beat being received
+     input logic [ADDR_WIDTH-1:0] i_addr_data,
+     input logic                  i_addr_valid,
+     output logic                   i_addr_ready,
 
-    // interrupt from the PS that an entire packet DMA is complete
-    input wire logic                  i_dma_complete,
-    // TODO: do we need backpressure? would be very annoying to
-    // implement, and this should only really have any effect
-    // at all AFTER a busy period has finished.
+     // interrupt from the PS that an entire packet DMA is complete
+     input logic                  i_dma_complete,
+     // TODO: do we need backpressure? would be very annoying to
+     // implement, and this should only really have any effect
+     // at all AFTER a busy period has finished.
 
-    output wire logic                 o_prev_beat_last,
-    output wire logic                 o_prev_beat_last_valid
-    // TODO: do we need backpressure?  upstream SHOULD have already
-    // been backpressured by the beat data itself, meaning the
-    // TLAST fifo of the skid_join always has the same room...
-    );
+     output logic                   o_prev_beat_last,
+     output logic                   o_prev_beat_last_valid
+     // TODO: do we need backpressure?  upstream SHOULD have already
+     // been backpressured by the beat data itself, meaning the
+     // TLAST fifo of the skid_join always has the same room...
+     );
 
     localparam PACKET_COUNTER_WIDTH = 2;
     localparam MAX_OUTSTANDING_PACKETS = 1 << PACKET_COUNTER_WIDTH;
@@ -437,4 +436,3 @@ module last_beat_calc #(
 
 `endif
 endmodule
-`default_nettype wire
