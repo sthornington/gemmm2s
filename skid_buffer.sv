@@ -6,16 +6,16 @@ module skid_buffer
     parameter WORD_WIDTH = 8
     )
     (
-     input logic                   clk,
-     input logic                   reset,
+     input wire logic                   clk,
+     input wire logic                   reset,
 
-     input logic                   i_valid,
-     output logic                  i_ready,
-     input logic [WORD_WIDTH-1:0]  i_data,
+     input wire logic                   i_valid,
+     output wire logic                  i_ready,
+     input wire logic [WORD_WIDTH-1:0]  i_data,
 
-     output logic                  o_valid,
-     input logic                   o_ready,
-     output logic [WORD_WIDTH-1:0] o_data
+     output wire logic                  o_valid,
+     input wire logic                   o_ready,
+     output wire logic [WORD_WIDTH-1:0] o_data
      );
 
     localparam WORD_ZERO = {WORD_WIDTH{1'b0}};

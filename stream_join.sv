@@ -13,20 +13,20 @@ module stream_join
     parameter OUT_WIDTH = LEFT_WIDTH + RIGHT_WIDTH
     )
     (
-     input logic                   clk,
-     input logic                   reset,
+     input wire logic                   clk,
+     input wire logic                   reset,
 
-     input logic                   i_left_valid,
-     output logic                  i_left_ready,
-     input logic [LEFT_WIDTH-1:0]  i_left_data,
+     input wire logic                   i_left_valid,
+     output wire logic                  i_left_ready,
+     input wire logic [LEFT_WIDTH-1:0]  i_left_data,
 
-     input logic                   i_right_valid,
-     output logic                  i_right_ready,
-     input logic [RIGHT_WIDTH-1:0] i_right_data,
+     input wire logic                   i_right_valid,
+     output wire logic                  i_right_ready,
+     input wire logic [RIGHT_WIDTH-1:0] i_right_data,
 
-     output logic                  o_valid,
-     input logic                   o_ready,
-     output logic [OUT_WIDTH-1:0]  o_data
+     output wire logic                  o_valid,
+     input wire logic                   o_ready,
+     output wire logic [OUT_WIDTH-1:0]  o_data
      );
 
     // if fire is true, we will pull a beat from the left fifo,

@@ -7,11 +7,11 @@ module register
     parameter RESET_VALUE = 0
     )
     (
-     input logic                   clk,
-     input logic                   clk_en,
-     input logic                   reset,
-     input logic [WORD_WIDTH-1:0]  i_data,
-     output logic [WORD_WIDTH-1:0] o_data
+     input wire logic                   clk,
+     input wire logic                   clk_en,
+     input wire logic                   reset,
+     input wire logic [WORD_WIDTH-1:0]  i_data,
+     output wire logic [WORD_WIDTH-1:0] o_data
      );
 
     initial begin
