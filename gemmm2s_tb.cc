@@ -90,6 +90,7 @@ double sc_time_stamp() {
 
 void do_write(GEMMM2SSim* sim,
               unsigned short base,
+              unsigned int &value,
               int n_beats,
               int id,
               bool tready_stall,
@@ -126,7 +127,7 @@ void do_write(GEMMM2SSim* sim,
                 break;
             }
             beat++;
-            sim->mod->S_AXI_WDATA = beat;
+            sim->mod->S_AXI_WDATA = value++;
             sim->mod->S_AXI_WLAST = beat == n_beats;
             sim->mod->S_AXI_WVALID = 0x1;
         }
@@ -231,19 +232,21 @@ void do_write_dma_complete(GEMMM2SSim* sim) {
 void run_unit_tests() {
     std::unique_ptr<GEMMM2SSim> unit_sim = std::make_unique<GEMMM2SSim>("unit_tests", 10000);
 
+    unsigned int value = 1;
+
     g_sim = unit_sim.get();
 
     unit_sim->reset();
     unit_sim->unreset();
 
     unit_sim->reset_t_beat_count();
-    do_write(unit_sim.get(), 0x0000, 4, 0, false, 0, 0, false);
+    do_write(unit_sim.get(), 0x0000, value, 4, 0, false, 0, 0, false);
     // do not DMA Complete here, let it wrap to 0x0000 to TLAST
     do_drain_t(unit_sim.get(), 2);
     assert(unit_sim->get_t_beat_count() == 3);
     assert(unit_sim->get_tlast_count() == 0);
 
-    do_write(unit_sim.get(), 0x0000, 32, 0, true, 2, 32, false);
+    do_write(unit_sim.get(), 0x0000, value, 32, 0, true, 2, 32, false);
     // flush for a while to flush the FIFOs that filled up
     // during our stall
     do_drain_t(unit_sim.get(), 8);
@@ -265,11 +268,11 @@ void run_unit_tests() {
     unit_sim->reset_tlast_count();
 
     // tready AND bready stall, tready stall in the middle of the burst
-    do_write(unit_sim.get(), 0x0000, 16, 0, true, 6, 16, true);
+    do_write(unit_sim.get(), 0x0000, value, 16, 0, true, 6, 16, true);
     // don't bother pausing between bursts even though the real
     // hardware does this.
     // tready AND bready stall, tready stall at the start of the burst
-    do_write(unit_sim.get(), 0x0020, 16, 0, true, 0, 16, true);
+    do_write(unit_sim.get(), 0x0020, value, 16, 0, true, 0, 16, true);
     do_write_dma_complete(unit_sim.get());
     do_write_dma_complete(unit_sim.get());
     do_drain_t(unit_sim.get(), 32);
@@ -277,9 +280,9 @@ void run_unit_tests() {
     assert(unit_sim->get_tlast_count() == 1);
 }
 
-void do_gem_burst(GEMMM2SSim* sim, unsigned short& base, const int burst_length)
+void do_gem_burst(GEMMM2SSim* sim, unsigned short& base, unsigned int& value, const int burst_length)
 {
-    do_write(sim, base, burst_length, 0, false, 0, 0, false);
+    do_write(sim, base, value, burst_length, 0, false, 0, 0, false);
     base += burst_length * 4;
     do_ticks(sim, 4);
 
@@ -287,6 +290,8 @@ void do_gem_burst(GEMMM2SSim* sim, unsigned short& base, const int burst_length)
 
 void run_gem_sim() {
     std::unique_ptr<GEMMM2SSim> gem_sim = std::make_unique<GEMMM2SSim>("gem", 10000);
+
+    unsigned int value = 1;
 
     g_sim = gem_sim.get();
 
@@ -301,17 +306,17 @@ void run_gem_sim() {
 
     unsigned short base = 0x0000;
 
-    do_gem_burst(gem_sim.get(), base, 3);
-    do_gem_burst(gem_sim.get(), base, 3);
+    do_gem_burst(gem_sim.get(), base, value, 3);
+    do_gem_burst(gem_sim.get(), base, value, 3);
 
-    do_gem_burst(gem_sim.get(), base, 4);
-    do_gem_burst(gem_sim.get(), base, 4);
-    do_gem_burst(gem_sim.get(), base, 4);
-    do_gem_burst(gem_sim.get(), base, 4);
+    do_gem_burst(gem_sim.get(), base, value, 4);
+    do_gem_burst(gem_sim.get(), base, value, 4);
+    do_gem_burst(gem_sim.get(), base, value, 4);
+    do_gem_burst(gem_sim.get(), base, value, 4);
 
-    do_gem_burst(gem_sim.get(), base, 1);
-    do_gem_burst(gem_sim.get(), base, 1);
-    do_gem_burst(gem_sim.get(), base, 1);
+    do_gem_burst(gem_sim.get(), base, value, 1);
+    do_gem_burst(gem_sim.get(), base, value, 1);
+    do_gem_burst(gem_sim.get(), base, value, 1);
 
     // wait for all the code on the PS core to handle the interrupt,
     // reset all the BDs and do a write to the control page of our
