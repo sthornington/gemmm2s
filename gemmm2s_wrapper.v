@@ -10,7 +10,7 @@
  for another day.
  */
 
-module gemmm2s_v2 #(
+module gemmm2s_wrapper #(
    parameter integer C_AXI_ID_WIDTH = 1,
    localparam C_AXI_DATA_WIDTH = 32, // DO NOT CHANGE
    localparam C_AXI_ADDR_WIDTH = 13 // DO NOT CHANGE

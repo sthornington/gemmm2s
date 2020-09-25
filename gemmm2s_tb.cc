@@ -3,33 +3,37 @@
 #include <iostream>
 #include <assert.h>
 #include "tb.h"
-#include "Vgemmm2s_v2.h"
+#include "Vgemmm2s_wrapper.h"
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 
-class GEMMM2SSim : public Sim<Vgemmm2s_v2>{
+class GEMMM2SSim : public Sim<Vgemmm2s_wrapper> {
+    static constexpr int ACTIVE_LOW = 0;
     int t_beat_count {};
     int tlast_count {};
 public:
     GEMMM2SSim(const char* trace_name, unsigned int time_limit)  :
         Sim(trace_name, time_limit)
     {
-        mod->reset = 1;
-        mod->clk = 0;
-        mod->s_axi_awvalid = 0;
-        mod->s_axi_wvalid = 0;
-        mod->s_axi_bready = 0;
+        mod->ARESETN = ACTIVE_LOW;
+        mod->ACLK = 0;
+        mod->S_AXI_AWVALID = 0;
+        mod->S_AXI_WVALID = 0;
+        mod->S_AXI_BREADY = 0;
     }
 
     void reset() {
-        mod->reset = 1;
-        mod->s_axi_awvalid = 0;
-        mod->s_axi_wvalid = 0;
-        mod->s_axi_bready = 0;
+        mod->ARESETN = ACTIVE_LOW;
+        mod->S_AXI_AWVALID = 0;
+        mod->S_AXI_WVALID = 0;
+        mod->S_AXI_BREADY = 0;
         for (int i=0; i<2; i++) {
             tick();
         }
-        mod->reset = 0;
+    }
+
+    void unreset() {
+        mod->ARESETN = !ACTIVE_LOW;
         tick();
     }
 
@@ -42,9 +46,9 @@ public:
     }
 
     void check_tdata() {
-        if (mod->m_axis_tvalid && mod->m_axis_tready) {
-            unsigned int tdata = mod->m_axis_tdata;
-            bool tlast = mod->m_axis_tlast;
+        if (mod->M_AXIS_TVALID && mod->M_AXIS_TREADY) {
+            unsigned int tdata = mod->M_AXIS_TDATA;
+            bool tlast = mod->M_AXIS_TLAST;
             t_beat_count++;
             if (tlast) {
                 tlast_count++;
@@ -65,11 +69,11 @@ public:
     void tick() {
         tickt(
             [&]() {
-                mod->clk = 1;
+                mod->ACLK = 1;
                 check_tdata();
             },
             [&]() {
-                mod->clk = 0;
+                mod->ACLK = 0;
             });
     }
 };
@@ -94,22 +98,22 @@ void do_write(GEMMM2SSim* sim,
               bool bready_stall)
 {
     // prepare the T side, always ready
-    sim->mod->m_axis_tready = 0x1;
+    sim->mod->M_AXIS_TREADY = 0x1;
 
     // start the AW
-    sim->mod->s_axi_awid = id;
-    sim->mod->s_axi_awaddr = base;
-    sim->mod->s_axi_awlen = n_beats - 1;
-    sim->mod->s_axi_awsize = 0x2; // 2^2 = 4 bytes
-    sim->mod->s_axi_awburst = 0x1; // INCR
-    sim->mod->s_axi_awvalid = 0x1;
+    sim->mod->S_AXI_AWID = id;
+    sim->mod->S_AXI_AWADDR = base;
+    sim->mod->S_AXI_AWLEN = n_beats - 1;
+    sim->mod->S_AXI_AWSIZE = 0x2; // 2^2 = 4 bytes
+    sim->mod->S_AXI_AWBURST = 0x1; // INCR
+    sim->mod->S_AXI_AWVALID = 0x1;
     std::cout << "Time: " << sim->time() << " data burst AWVALID " << std::endl;
 
-    while (!sim->mod->s_axi_awready) { sim->tick(); }
+    while (!sim->mod->S_AXI_AWREADY) { sim->tick(); }
     // tick over the transaction
     sim->tick();
     // AW accepted, kill AW
-    sim->mod->s_axi_awvalid = 0x0;
+    sim->mod->S_AXI_AWVALID = 0x0;
 
     // start the W
     int stall_count = 0;
@@ -117,33 +121,33 @@ void do_write(GEMMM2SSim* sim,
     int beat = 0;
     for (int i=0; i<100; i++) {
         if (trans_accepted) {
-            if (sim->mod->s_axi_wlast) {
+            if (sim->mod->S_AXI_WLAST) {
                 std::cout << "Time: " << sim->time() << " data burst WLAST accepted\n";
                 break;
             }
             beat++;
-            sim->mod->s_axi_wdata = beat;
-            sim->mod->s_axi_wlast = beat == n_beats;
-            sim->mod->s_axi_wvalid = 0x1;
+            sim->mod->S_AXI_WDATA = beat;
+            sim->mod->S_AXI_WLAST = beat == n_beats;
+            sim->mod->S_AXI_WVALID = 0x1;
         }
         if (tready_stall && (i >= tready_stall_at && (stall_count++ < tready_stall_for))) {
             // this might change WREADY so we need to eval
-            sim->mod->m_axis_tready = 0x0;
+            sim->mod->M_AXIS_TREADY = 0x0;
         } else {
-            sim->mod->m_axis_tready = 0x1;
+            sim->mod->M_AXIS_TREADY = 0x1;
         }
         sim->mod->eval();
-        trans_accepted = sim->mod->s_axi_wvalid && sim->mod->s_axi_wready;
+        trans_accepted = sim->mod->S_AXI_WVALID && sim->mod->S_AXI_WREADY;
         sim->tick();
     }
 
     assert(beat == n_beats);
 
     // W accepted, kill W
-    sim->mod->s_axi_wvalid = 0x0;
+    sim->mod->S_AXI_WVALID = 0x0;
     // tidy up the rest
-    sim->mod->s_axi_wdata = 0x00000000;
-    sim->mod->s_axi_wlast = 0x0;
+    sim->mod->S_AXI_WDATA = 0x00000000;
+    sim->mod->S_AXI_WLAST = 0x0;
 
     // await the B
     if (bready_stall) {
@@ -154,13 +158,13 @@ void do_write(GEMMM2SSim* sim,
         sim->tick();
         sim->tick();
     }
-    sim->mod->s_axi_bready = 0x1;
-    while (!sim->mod->s_axi_bvalid) { sim->tick(); }
+    sim->mod->S_AXI_BREADY = 0x1;
+    while (!sim->mod->S_AXI_BVALID) { sim->tick(); }
     // tick over the transaction();
-    assert(sim->mod->s_axi_bid == sim->mod->s_axi_awid);
+    assert(sim->mod->S_AXI_BID == sim->mod->S_AXI_AWID);
     sim->tick();
     // B accepted, kill B
-    sim->mod->s_axi_bready = 0x0;
+    sim->mod->S_AXI_BREADY = 0x0;
 }
 
 void do_ticks(GEMMM2SSim* sim, int n_ticks) {
@@ -173,55 +177,55 @@ void do_ticks(GEMMM2SSim* sim, int n_ticks) {
 void do_drain_t(GEMMM2SSim* sim, int n_beats)
 {
     // prepare the T side, always ready
-    sim->mod->m_axis_tready = 0x1;
+    sim->mod->M_AXIS_TREADY = 0x1;
 
     // tick N times to consume all the T beats we can
-    for (int i=0; i<n_beats && sim->mod->m_axis_tvalid; i++) {
+    for (int i=0; i<n_beats && sim->mod->M_AXIS_TVALID; i++) {
         sim->tick();
     }
 }
 
 void do_write_dma_complete(GEMMM2SSim* sim) {
     // start the AW
-    sim->mod->s_axi_awid = 0x1;
-    sim->mod->s_axi_awaddr = 0x1000;
-    sim->mod->s_axi_awlen = 0x00;
-    sim->mod->s_axi_awsize = 0x2; // 2^2 = 4 bytes
-    sim->mod->s_axi_awburst = 0x1; // INCR
-    sim->mod->s_axi_awvalid = 0x1;
+    sim->mod->S_AXI_AWID = 0x1;
+    sim->mod->S_AXI_AWADDR = 0x1000;
+    sim->mod->S_AXI_AWLEN = 0x00;
+    sim->mod->S_AXI_AWSIZE = 0x2; // 2^2 = 4 bytes
+    sim->mod->S_AXI_AWBURST = 0x1; // INCR
+    sim->mod->S_AXI_AWVALID = 0x1;
 
     std::cout << "Time: " << sim->time() << " DMA Complete AWVALID\n";
 
-    while (!sim->mod->s_axi_awready) { sim->tick(); }
+    while (!sim->mod->S_AXI_AWREADY) { sim->tick(); }
     // tick over the transaction
     sim->tick();
     // AW accepted, kill AW
-    sim->mod->s_axi_awvalid = 0x0;
+    sim->mod->S_AXI_AWVALID = 0x0;
 
     // start the W
-    sim->mod->s_axi_wdata = 0x0000001;
-    sim->mod->s_axi_wlast = 0x1;
-    sim->mod->s_axi_wvalid = 0x1;
+    sim->mod->S_AXI_WDATA = 0x0000001;
+    sim->mod->S_AXI_WLAST = 0x1;
+    sim->mod->S_AXI_WVALID = 0x1;
 
-    while (!sim->mod->s_axi_wready) { sim->tick(); }
+    while (!sim->mod->S_AXI_WREADY) { sim->tick(); }
     // tick over the transaction
     sim->tick();
     std::cout << "Time: " << sim->time() << " DMA Complete accepted\n";
 
     // W accepted, kill W
-    sim->mod->s_axi_wvalid = 0x0;
+    sim->mod->S_AXI_WVALID = 0x0;
     // tidy up the rest
-    sim->mod->s_axi_wdata = 0x00000000;
-    sim->mod->s_axi_wlast = 0x0;
+    sim->mod->S_AXI_WDATA = 0x00000000;
+    sim->mod->S_AXI_WLAST = 0x0;
 
     // await B
-    sim->mod->s_axi_bready = 0x1;
-    while (!sim->mod->s_axi_bvalid) { sim->tick(); }
+    sim->mod->S_AXI_BREADY = 0x1;
+    while (!sim->mod->S_AXI_BVALID) { sim->tick(); }
     // tick over the transaction();
-    assert(sim->mod->s_axi_bid == sim->mod->s_axi_awid);
+    assert(sim->mod->S_AXI_BID == sim->mod->S_AXI_AWID);
     sim->tick();
     // B accepted, kill B
-    sim->mod->s_axi_bready = 0x0;
+    sim->mod->S_AXI_BREADY = 0x0;
 }
 
 void run_unit_tests() {
@@ -230,6 +234,7 @@ void run_unit_tests() {
     g_sim = unit_sim.get();
 
     unit_sim->reset();
+    unit_sim->unreset();
 
     unit_sim->reset_t_beat_count();
     do_write(unit_sim.get(), 0x0000, 4, 0, false, 0, 0, false);
@@ -286,6 +291,7 @@ void run_gem_sim() {
     g_sim = gem_sim.get();
 
     gem_sim->reset();
+    gem_sim->unreset();
 
     // now do a realistic-ish simulation of the GEM hardware:
     // 2 bursts of 3 beats (MAC addrs)

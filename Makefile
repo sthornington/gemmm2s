@@ -1,15 +1,16 @@
-SV	:= gemmm2s_v2.sv
+V	:= gemmm2s_wrapper.v
 TB	:= gemmm2s_tb.cc
 SRCS	:= $(SV) $(TB)
 OBJDIR 	:= obj_dir
-VMKFILE	:= Vgemmm2s_v2.mk
-VMKFILEABS	:= $(addprefix $(OBJDIR)/,Vgemmm2s_v2.mk)
-VBINARY	:= $(addprefix $(OBJDIR)/,Vgemmm2s_v2)
+VMKFILE	:= Vgemmm2s_wrapper.mk
+VMKFILEABS	:= $(addprefix $(OBJDIR)/,Vgemmm2s_wrapper.mk)
+VBINARY	:= $(addprefix $(OBJDIR)/,Vgemmm2s_wrapper)
 VSRCS	:= $(addprefix $(OBJDIR)/,%.cpp)
 VHEADERS	:= $(addprefix $(OBJDIR)/,%.h)
 
 all:	gemmm2s_sim.vcd
 
+# TODO: cleanup formal crap too
 clean:
 	rm -Rf $(OBJDIR)
 
@@ -22,7 +23,7 @@ $(VBINARY):	$(VMKFILEABS)
 	make -C $(OBJDIR) -f $(VMKFILE)
 
 $(VMKFILEABS):	$(SRCS)
-	verilator -Wall  -CFLAGS "-g -O0 -std=c++17" --trace -cc $(SV) --exe $(TB)
+	verilator -Wall  -CFLAGS "-g -O0 -std=c++17" --trace -cc $(V) --exe $(TB)
 
 register:	register.sv register.sby
 	sby -f register.sby
