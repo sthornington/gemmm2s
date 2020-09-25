@@ -240,7 +240,7 @@ void run_unit_tests() {
     unit_sim->unreset();
 
     unit_sim->reset_t_beat_count();
-    do_write(unit_sim.get(), 0x0000, value, 4, 0, false, 0, 0, false);
+    do_write(unit_sim.get(), 0x0000, value, 4, 1, false, 0, 0, false);
     // do not DMA Complete here, let it wrap to 0x0000 to TLAST
     do_drain_t(unit_sim.get(), 2);
     assert(unit_sim->get_t_beat_count() == 3);

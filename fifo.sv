@@ -229,3 +229,4 @@ module fifo #(
 
 
 endmodule
+`default_nettype wire

@@ -437,3 +437,4 @@ module last_beat_calc #(
 
 `endif
 endmodule
+`default_nettype wire

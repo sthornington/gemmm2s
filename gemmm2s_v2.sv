@@ -571,3 +571,4 @@ module gemmm2s_v2 #(
 `endif
 
 endmodule
+`default_nettype wire

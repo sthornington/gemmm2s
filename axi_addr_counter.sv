@@ -263,3 +263,4 @@ module axi_addr_counter #(
 `endif
 
 endmodule
+`default_nettype wire

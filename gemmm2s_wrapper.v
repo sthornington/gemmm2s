@@ -16,33 +16,33 @@ module gemmm2s_wrapper #(
    localparam C_AXI_ADDR_WIDTH = 13 // DO NOT CHANGE
    )
    (
-    input logic                           ACLK,
-    input logic                           ARESETN,
+    input wire                           ACLK,
+    input wire                           ARESETN,
 
     // Ports of Axi Slave Bus Interface S_AXI
-    input logic [C_AXI_ID_WIDTH-1 : 0]    S_AXI_AWID,
-    input logic [C_AXI_ADDR_WIDTH-1 : 0]  S_AXI_AWADDR,
-    input logic [7 : 0]                   S_AXI_AWLEN,
-    input logic [2 : 0]                   S_AXI_AWSIZE,
-    input logic [1 : 0]                   S_AXI_AWBURST,
-    input logic                           S_AXI_AWVALID,
-    output logic                          S_AXI_AWREADY,
+    input wire [C_AXI_ID_WIDTH-1 : 0]    S_AXI_AWID,
+    input wire [C_AXI_ADDR_WIDTH-1 : 0]  S_AXI_AWADDR,
+    input wire [7 : 0]                   S_AXI_AWLEN,
+    input wire [2 : 0]                   S_AXI_AWSIZE,
+    input wire [1 : 0]                   S_AXI_AWBURST,
+    input wire                           S_AXI_AWVALID,
+    output wire                          S_AXI_AWREADY,
 
-    input logic [C_AXI_DATA_WIDTH-1 : 0]  S_AXI_WDATA,
-    input logic                           S_AXI_WLAST,
-    input logic                           S_AXI_WVALID,
-    output logic                          S_AXI_WREADY,
+    input wire [C_AXI_DATA_WIDTH-1 : 0]  S_AXI_WDATA,
+    input wire                           S_AXI_WLAST,
+    input wire                           S_AXI_WVALID,
+    output wire                          S_AXI_WREADY,
 
-    output logic [C_AXI_ID_WIDTH-1 : 0]   S_AXI_BID,
-    output logic [1 : 0]                  S_AXI_BRESP,
-    output logic                          S_AXI_BVALID,
-    input logic                           S_AXI_BREADY,
+    output wire [C_AXI_ID_WIDTH-1 : 0]   S_AXI_BID,
+    output wire [1 : 0]                  S_AXI_BRESP,
+    output wire                          S_AXI_BVALID,
+    input wire                           S_AXI_BREADY,
 
     // Ports of Axi Stream Master Bus Interface M_AXIS
-    output logic [C_AXI_DATA_WIDTH-1 : 0] M_AXIS_TDATA,
-    output logic                          M_AXIS_TLAST,
-    output logic                          M_AXIS_TVALID,
-    input logic                           M_AXIS_TREADY
+    output wire [C_AXI_DATA_WIDTH-1 : 0] M_AXIS_TDATA,
+    output wire                          M_AXIS_TLAST,
+    output wire                          M_AXIS_TVALID,
+    input wire                           M_AXIS_TREADY
     );
 
     localparam C_AXI_TOTAL_AW_WIDTH = C_AXI_ID_WIDTH +
@@ -57,8 +57,8 @@ module gemmm2s_wrapper #(
     localparam C_AXI_TOTAL_T_WIDTH = C_AXI_DATA_WIDTH +
                                      1; // TLAST
 
-    logic                                 clk;
-    logic                                 reset;
+    reg                                 clk;
+    reg                                 reset;
 
     always @(*)
       clk = ACLK;
@@ -66,18 +66,21 @@ module gemmm2s_wrapper #(
     always @(*)
       reset = !ARESETN;
 
-    logic [C_AXI_ID_WIDTH-1 : 0]          skid_awid;
-    logic [C_AXI_ADDR_WIDTH-1 : 0]        skid_awaddr;
-    logic [7 : 0]                         skid_awlen;
-    logic [2 : 0]                         skid_awsize;
-    logic [1 : 0]                         skid_awburst;
-    logic                                 skid_awvalid;
-    logic                                 skid_awready;
+    reg [C_AXI_ID_WIDTH-1 : 0]          skid_awid;
+    reg [C_AXI_ADDR_WIDTH-1 : 0]        skid_awaddr;
+    reg [7 : 0]                         skid_awlen;
+    reg [2 : 0]                         skid_awsize;
+    reg [1 : 0]                         skid_awburst;
+    reg                                 skid_awvalid;
+    reg                                 skid_awready;
+
+    // TODO: inbound skids could be half-skids?  (i.e. the data lines
+    // probably need not be registered)
 
     // INBOUND skid of AW
     skid_buffer #(.WORD_WIDTH(C_AXI_TOTAL_AW_WIDTH)) awskid
-      (.clk,
-       .reset,
+      (.clk(clk),
+       .reset(reset),
        .i_valid(S_AXI_AWVALID),
        .i_ready(S_AXI_AWREADY),
        .i_data({S_AXI_AWID, S_AXI_AWADDR, S_AXI_AWLEN, S_AXI_AWSIZE, S_AXI_AWBURST}),
@@ -85,15 +88,15 @@ module gemmm2s_wrapper #(
        .o_ready(skid_awready),
        .o_data({skid_awid, skid_awaddr, skid_awlen, skid_awsize, skid_awburst}));
 
-    logic [C_AXI_DATA_WIDTH-1 : 0]        skid_wdata;
-    logic                                 skid_wlast;
-    logic                                 skid_wvalid;
-    logic                                 skid_wready;
+    reg [C_AXI_DATA_WIDTH-1 : 0]        skid_wdata;
+    reg                                 skid_wlast;
+    reg                                 skid_wvalid;
+    reg                                 skid_wready;
 
     // INBOUND skid of W
     skid_buffer #(.WORD_WIDTH(C_AXI_TOTAL_W_WIDTH)) wskid
-      (.clk,
-       .reset,
+      (.clk(clk),
+       .reset(reset),
        .i_valid(S_AXI_WVALID),
        .i_ready(S_AXI_WREADY),
        .i_data({S_AXI_WDATA, S_AXI_WLAST}),
@@ -101,15 +104,15 @@ module gemmm2s_wrapper #(
        .o_ready(skid_wready),
        .o_data({skid_wdata, skid_wlast}));
 
-    logic [C_AXI_ID_WIDTH-1 : 0]          skid_bid;
-    logic [1 : 0]                         skid_bresp;
-    logic                                 skid_bvalid;
-    logic                                 skid_bready;
+    reg [C_AXI_ID_WIDTH-1 : 0]          skid_bid;
+    reg [1 : 0]                         skid_bresp;
+    reg                                 skid_bvalid;
+    reg                                 skid_bready;
 
     // OUTBOUND skid of B
     skid_buffer #(.WORD_WIDTH(C_AXI_TOTAL_B_WIDTH)) bskid
-      (.clk,
-       .reset,
+      (.clk(clk),
+       .reset(reset),
        .i_valid(skid_bvalid),
        .i_ready(skid_bready),
        .i_data({skid_bid, skid_bresp}),
@@ -117,15 +120,15 @@ module gemmm2s_wrapper #(
        .o_ready(S_AXI_BREADY),
        .o_data({S_AXI_BID, S_AXI_BRESP}));
 
-    logic [C_AXI_DATA_WIDTH-1 : 0]        skid_tdata;
-    logic                                 skid_tlast;
-    logic                                 skid_tvalid;
-    logic                                 skid_tready;
+    reg [C_AXI_DATA_WIDTH-1 : 0]        skid_tdata;
+    reg                                 skid_tlast;
+    reg                                 skid_tvalid;
+    reg                                 skid_tready;
 
     // OUTBOUND skid of T
     skid_buffer #(.WORD_WIDTH(C_AXI_TOTAL_T_WIDTH)) tskid
-      (.clk,
-       .reset,
+      (.clk(clk),
+       .reset(reset),
        .i_valid(skid_tvalid),
        .i_ready(skid_tready),
        .i_data({skid_tdata, skid_tlast}),
@@ -134,9 +137,9 @@ module gemmm2s_wrapper #(
        .o_data({M_AXIS_TDATA, M_AXIS_TLAST}));
 
     // TODO: I guess this is when it would be nice to have interfaces and modports
-    gemmm2s_v2 #(.C_AXI_ID_WIDTH) gemmm2s
-      (.clk,
-       .reset,
+    gemmm2s_v2 #(.C_AXI_ID_WIDTH(C_AXI_ID_WIDTH)) gemmm2s
+      (.clk(clk),
+       .reset(reset),
        .s_axi_awid(skid_awid),
        .s_axi_awaddr(skid_awaddr),
        .s_axi_awlen(skid_awlen),
@@ -158,3 +161,4 @@ module gemmm2s_wrapper #(
        .m_axis_tready(skid_tready));
 
 endmodule
+`default_nettype wire

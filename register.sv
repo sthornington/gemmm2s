@@ -56,3 +56,4 @@ module register
 `endif
 
 endmodule
+`default_nettype wire

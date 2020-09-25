@@ -328,3 +328,4 @@ module stream_join
 `endif
 
 endmodule
+`default_nettype wire

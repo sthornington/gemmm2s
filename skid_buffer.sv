@@ -308,3 +308,4 @@ module skid_buffer
 `endif
 
 endmodule
+`default_nettype wire
