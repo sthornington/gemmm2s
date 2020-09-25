@@ -91,6 +91,14 @@ module gemmm2s_v2 #(
     logic [8:0]                           r_addr_count;
     logic                                 r_bvalid;
 
+    // cached data from AW
+    logic [C_AXI_ID_WIDTH-1:0]            r_id;
+    logic                                 r_page;
+    logic [C_AXI_ADDR_WIDTH-2:0]          r_page_addr;
+    logic [7:0]                           r_awlen;
+    logic [2:0]                           r_awsize;
+    logic [1:0]                           r_awburst;
+
     initial begin
         r_awready = 1;
         r_wready = 0;
@@ -107,14 +115,6 @@ module gemmm2s_v2 #(
         r_awsize = 0;
         r_awburst = 0;
     end
-
-    // cached data from AW
-    logic [C_AXI_ID_WIDTH-1:0]            r_id;
-    logic                                 r_page;
-    logic [C_AXI_ADDR_WIDTH-2:0]          r_page_addr;
-    logic [7:0]                           r_awlen;
-    logic [2:0]                           r_awsize;
-    logic [1:0]                           r_awburst;
 
     always_ff @(posedge clk) begin
         if (s_axi_awvalid && s_axi_awready) begin
