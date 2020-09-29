@@ -39,6 +39,7 @@ module gemmm2s_wrapper #(
     input wire                           S_AXI_BREADY,
 
     // unsupported READ slave interface
+    /* verilator lint_off UNUSED */
     input wire [C_AXI_ID_WIDTH-1 : 0]    S_AXI_ARID,
     input wire [C_AXI_ADDR_WIDTH-1 : 0]  S_AXI_ARADDR,
     input wire [7 : 0]                   S_AXI_ARLEN,
@@ -53,6 +54,7 @@ module gemmm2s_wrapper #(
     output wire                          S_AXI_RLAST,
     output wire                          S_AXI_RVALID,
     input wire                           S_AXI_RREADY,
+    /* verilator lint_on UNUSED */
 
     // Ports of Axi Stream Master Bus Interface M_AXIS
     output wire [C_AXI_DATA_WIDTH-1 : 0] M_AXIS_TDATA,
@@ -78,6 +80,10 @@ module gemmm2s_wrapper #(
 
     // disable the read side for now
     assign S_AXI_ARREADY = 0;
+    assign S_AXI_RID = 0;
+    assign S_AXI_RDATA = 0;
+    assign S_AXI_RRESP = 0;
+    assign S_AXI_RLAST = 0;
     assign S_AXI_RVALID = 0;
 
     always @(*)
