@@ -38,6 +38,22 @@ module gemmm2s_wrapper #(
     output wire                          S_AXI_BVALID,
     input wire                           S_AXI_BREADY,
 
+    // unsupported READ slave interface
+    input wire [C_AXI_ID_WIDTH-1 : 0]    S_AXI_ARID,
+    input wire [C_AXI_ADDR_WIDTH-1 : 0]  S_AXI_ARADDR,
+    input wire [7 : 0]                   S_AXI_ARLEN,
+    input wire [2 : 0]                   S_AXI_ARSIZE,
+    input wire [1 : 0]                   S_AXI_ARBURST,
+    input wire                           S_AXI_ARVALID,
+    output wire                          S_AXI_ARREADY,
+
+    output wire [C_AXI_ID_WIDTH-1 : 0]   S_AXI_RID,
+    output wire [C_AXI_DATA_WIDTH-1 : 0] S_AXI_RDATA,
+    output wire [1 : 0]                  S_AXI_RRESP,
+    output wire                          S_AXI_RLAST,
+    output wire                          S_AXI_RVALID,
+    input wire                           S_AXI_RREADY,
+
     // Ports of Axi Stream Master Bus Interface M_AXIS
     output wire [C_AXI_DATA_WIDTH-1 : 0] M_AXIS_TDATA,
     output wire                          M_AXIS_TLAST,
@@ -59,6 +75,10 @@ module gemmm2s_wrapper #(
 
     reg                                 clk;
     reg                                 reset;
+
+    // disable the read side for now
+    assign S_AXI_ARREADY = 0;
+    assign S_AXI_RVALID = 0;
 
     always @(*)
       clk = ACLK;
